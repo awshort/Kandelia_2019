@@ -1,0 +1,53 @@
+#load libraries
+```{r, include=FALSE}
+library(lme4)
+library(readr)
+library(emmeans)
+library(ggplot2)
+library(lmerTest)
+```
+
+#analyze reponse to oxidative stress genes
+```{r, include=FALSE}
+p2 <- read_tsv("shared_plus_unshared.Response_to_oxidative_sress.25_vs_10_log2FC_no_pvalue_cutoff.tsv")
+names(p2)
+```
+```{r, include=FALSE}
+lm1<-lm(log2FoldChange~Species,data = p2)
+summary(lm1)
+```
+```{r}
+emmeans_condition_by_Species<-emmeans(lm1, pairwise ~ Species)
+emmeans_condition_by_Species$contrast
+write.csv(emmeans_condition_by_Species$contrast,"shared_plus_unshared.Response_to_oxidative_sress.25_vs_10_log2FC.emmeans_condition_by_Species.csv")
+```
+
+#analyze photosynthesis genes
+```{r, include=FALSE}
+p2 <- read_tsv("shared_plus_unshared.photosynthesis.25_vs_10_log2FC_no_pvalue_cutoff.tsv")
+names(p2)
+```
+```{r, include=FALSE}
+lm1<-lm(log2FoldChange~Species,data = p2)
+summary(lm1)
+```
+```{r}
+emmeans_condition_by_Species<-emmeans(lm1, pairwise ~ Species)
+emmeans_condition_by_Species$contrast
+write.csv(emmeans_condition_by_Species$contrast,"shared_plus_unshared.photosynthesis.25_vs_10_log2FC.emmeans_condition_by_Species.csv")
+```
+
+#analyze photoprotection genes
+```{r, include=FALSE}
+p2 <- read_tsv("shared_plus_unshared.photoprotection.25_vs_10_log2FC_no_pvalue_cutoff.txt")
+names(p2)
+```
+```{r, include=FALSE}
+lm1<-lm(log2FoldChange~Species,data = p2)
+summary(lm1)
+```
+```{r}
+emmeans_condition_by_Species<-emmeans(lm1, pairwise ~ Species)
+emmeans_condition_by_Species$contrast
+write.csv(emmeans_condition_by_Species$contrast,"shared_plus_unshared.photoprotection.25_vs_10_log2FC.emmeans_condition_by_Species.csv")
+```
