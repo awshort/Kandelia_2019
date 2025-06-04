@@ -1,0 +1,155 @@
+#load libraries
+library(lme4)
+library(readr)
+library(emmeans)
+library(ggplot2)
+library(lmerTest)
+
+#load enzyme data
+Enzyme <- read_csv("Enzyme/Enzyme_Data_Table_3.csv")
+names(Enzyme)
+Enzyme$Species_Pop <- paste0(Enzyme$Species,"_",Enzyme$Population)
+Enzyme$Species_Pop
+
+#calculate LMER
+SOD_LMER<-lmer(Enzyme$SOD~Condition_Key*Species/Population+(1|Number),data = Enzyme)
+summary(SOD_LMER)
+
+MDA_LMER<-lmer(Enzyme$MDA~Condition_Key*Species/Population+(1|Number),data = Enzyme)
+summary(MDA_LMER)
+
+APX_LMER<-lmer(Enzyme$APX~Condition_Key*Species/Population+(1|Number),data = Enzyme)
+summary(APX_LMER)
+
+POD_LMER<-lmer(Enzyme$POD~Condition_Key*Species/Population+(1|Number),data = Enzyme)
+summary(POD_LMER)
+
+H2O2_LMER<-lmer(Enzyme$H2O2~Condition_Key*Species/Population+(1|Number),data = Enzyme)
+summary(H2O2_LMER)
+
+#calculate emmeans between species by condition
+emmeans_Species_by_Condition<-emmeans(SOD_LMER, pairwise ~ Species | Condition_Key)
+emmeans_Species_by_Condition$contrast
+write.csv(emmeans_Species_by_Condition$contrast, "SOD_LMER_emmeans_Species_by_Condition_Key.csv")
+
+emmeans_Species_by_Condition<-emmeans(MDA_LMER, pairwise ~ Species | Condition_Key)
+emmeans_Species_by_Condition$contrast
+write.csv(emmeans_Species_by_Condition$contrast, "MDA_LMER_emmeans_Species_by_Condition_Key.csv")
+
+emmeans_Species_by_Condition<-emmeans(APX_LMER, pairwise ~ Species | Condition_Key)
+emmeans_Species_by_Condition$contrast
+write.csv(emmeans_Species_by_Condition$contrast, "APX_LMER_emmeans_Species_by_Condition_Key.csv")
+
+emmeans_Species_by_Condition<-emmeans(POD_LMER, pairwise ~ Species | Condition_Key)
+emmeans_Species_by_Condition$contrast
+write.csv(emmeans_Species_by_Condition$contrast, "POD_LMER_emmeans_Species_by_Condition_Key.csv")
+
+emmeans_Species_by_Condition<-emmeans(H2O2_LMER, pairwise ~ Species | Condition_Key)
+emmeans_Species_by_Condition$contrast
+write.csv(emmeans_Species_by_Condition$contrast, "H2O2_LMER_emmeans_Species_by_Condition_Key.csv")
+
+#Plot SOD
+library(ggplot2)
+library(Rmisc)
+supp.labels <- c("Kandelia obovata", "Kandelia candel")
+names(supp.labels)<-c("KO","KC")
+tgc <- summarySE(Enzyme, measurevar="SOD", groupvars=c("Condition_Key", "Species"))
+pd <- position_dodge(0.1)
+pdf("Enzyme/SOD/SOD_ENZYME_dots_and_lines_by_species.pdf")
+p1 <- ggplot(tgc, aes(x=Condition_Key, y=SOD, color=Species, group=Species)) +
+    geom_errorbar(aes(ymin=SOD-se, ymax=SOD+se, color=Species), width=.1, position=pd) +
+    geom_line(position=pd) +
+    geom_point(position=pd, size=3, aes())+
+    scale_color_manual(values=c("black","grey60"))+
+    scale_x_discrete(breaks=c("A","C","E"), labels=c(bquote(25*degree*C),bquote(10*degree*C),"Recovery 6 days"))+
+    ylab("SOD(umol/g)")+
+    xlab("Treatment Condition")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=90), strip.text.x = element_text(size=15,face="italic"), text=element_text(size=15))
+p1
+dev.off()
+
+#Plot MDA
+library(ggplot2)
+library(Rmisc)
+supp.labels <- c("Kandelia obovata", "Kandelia candel")
+names(supp.labels)<-c("KO","KC")
+tgc <- summarySE(Enzyme, measurevar="MDA", groupvars=c("Condition_Key", "Species"))
+pd <- position_dodge(0.1)
+pdf("Enzyme/MDA/MDA_ENZYME_dots_and_lines_by_species.pdf")
+p4 <- ggplot(tgc, aes(x=Condition_Key, y=MDA, color=Species, group=Species)) +
+    geom_errorbar(aes(ymin=MDA-se, ymax=MDA+se, color=Species), width=.1, position=pd) +
+    geom_line(position=pd) +
+    geom_point(position=pd, size=3, aes())+
+    scale_color_manual(values=c("black","grey60"))+
+    scale_x_discrete(breaks=c("A","C","E"), labels=c(bquote(25*degree*C),bquote(10*degree*C),"Recovery 6 days"))+
+    ylab("MDA(umol/g)")+
+    xlab("Treatment Condition")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=90), strip.text.x = element_text(size=15,face="italic"), text=element_text(size=15))
+p4
+dev.off()
+
+#Plot APX
+library(ggplot2)
+library(Rmisc)
+supp.labels <- c("Kandelia obovata", "Kandelia candel")
+names(supp.labels)<-c("KO","KC")
+tgc <- summarySE(Enzyme, measurevar="APX", groupvars=c("Condition_Key", "Species"))
+pd <- position_dodge(0.1)
+pdf("Enzyme/APX/APX_ENZYME_dots_and_lines_by_species.pdf")
+p6 <- ggplot(tgc, aes(x=Condition_Key, y=APX, color=Species, group=Species)) +
+    geom_errorbar(aes(ymin=APX-se, ymax=APX+se, color=Species), width=.1, position=pd) +
+    geom_line(position=pd) +
+    geom_point(position=pd, size=3, aes())+
+    scale_color_manual(values=c("black","grey60"))+
+    scale_x_discrete(breaks=c("A","C","E"), labels=c(bquote(25*degree*C),bquote(10*degree*C),"Recovery 6 days"))+
+    ylab("APX(umol/g)")+
+    xlab("Treatment Condition")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=90), strip.text.x = element_text(size=15,face="italic"), text=element_text(size=15))
+p6
+dev.off()
+
+#PLot POD
+library(ggplot2)
+library(Rmisc)
+supp.labels <- c("Kandelia obovata", "Kandelia candel")
+names(supp.labels)<-c("KO","KC")
+tgc <- summarySE(Enzyme, measurevar="POD", groupvars=c("Condition_Key", "Species"))
+pd <- position_dodge(0.1)
+pdf("Enzyme/POD/POD_ENZYME_dots_and_lines_by_species.pdf")
+p8 <- ggplot(tgc, aes(x=Condition_Key, y=POD, color=Species, group=Species)) +
+    geom_errorbar(aes(ymin=POD-se, ymax=POD+se, color=Species), width=.1, position=pd) +
+    geom_line(position=pd) +
+    geom_point(position=pd, size=3, aes())+
+    scale_color_manual(values=c("black","grey60"))+
+    scale_x_discrete(breaks=c("A","C","E"), labels=c(bquote(25*degree*C),bquote(10*degree*C),"Recovery 6 days"))+
+    ylab("POD(umol/g)")+
+    xlab("Treatment Condition")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=90), strip.text.x = element_text(size=15,face="italic"), text=element_text(size=15))
+p8
+dev.off()
+
+#Plot H2O2
+library(ggplot2)
+library(Rmisc)
+supp.labels <- c("Kandelia obovata", "Kandelia candel")
+names(supp.labels)<-c("KO","KC")
+tgc <- summarySE(Enzyme, measurevar="H2O2", groupvars=c("Condition_Key", "Species"))
+pd <- position_dodge(0.1)
+pdf("Enzyme/H2O2/H2O2_ENZYME_dots_and_lines_by_species.pdf")
+p12 <- ggplot(tgc, aes(x=Condition_Key, y=H2O2, color=Species, group=Species)) +
+    geom_errorbar(aes(ymin=H2O2-se, ymax=H2O2+se, color=Species), width=.1, position=pd) +
+    geom_line(position=pd) +
+    geom_point(position=pd, size=3, aes())+
+    scale_color_manual(values=c("black","grey60"))+
+    scale_x_discrete(breaks=c("A","C","E"), labels=c(bquote(25*degree*C),bquote(10*degree*C),"Recovery 6 days"))+
+    ylab("H2O2(umol/g)")+
+    xlab("Treatment Condition")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=90), strip.text.x = element_text(size=15,face="italic"), text=element_text(size=15))
+p12
+dev.off()
+
