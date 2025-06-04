@@ -1,0 +1,43 @@
+#load packages
+library(lme4)
+library(readr)
+library(emmeans)
+library(ggplot2)
+library(lmerTest)
+
+#load data
+FVFM <- read_csv("FvFm_Final_R_8.csv")
+names(FVFM)
+
+#Run LMER
+LMER<-lmer(FVFM$FvFm~Condition_Key*Species/Population+(1|Number),data = FVFM)
+summary(LMER)
+
+#calculate emmeans for species by conditon
+emmeans_Species_by_Condition<-emmeans(LMER, pairwise ~ Species | Condition_Key)
+emmeans_Species_by_Condition$contrast
+write.csv(emmeans_Species_by_Condition$contrast, "FvFm_emmeans_Species_by_Condition_Key.csv")
+
+#plot FvFm for each treatment conditions for both species
+library(ggplot2)
+library(Rmisc)
+supp.labels <- c("Kandelia obovata", "Kandelia candel")
+names(supp.labels)<-c("KO","KC")
+tgc <- summarySE(FVFM, measurevar="FvFm", groupvars=c("Condition_Key", "Species"))
+#subset()
+pd <- position_dodge(0.1)
+pdf("dots_and_lines.pdf", width = 14)
+p1 <- ggplot(tgc, aes(x=Condition_Key, y=FvFm, color=Species, group=Species)) +
+    geom_errorbar(aes(ymin=FvFm-se, ymax=FvFm+se, color=Species), width=0.1, position=pd) +
+    geom_line(position=pd) +
+    geom_point(position=pd, size=3)+
+    scale_color_manual(values=c("black","grey60"))+
+    scale_x_discrete(breaks=c("A","B","C","D","E"), labels=c(bquote(25*degree*C),bquote(15*degree*C),bquote(10*degree*C),"Recovery 2 days", "Recovery 6 days"))+
+    ylab(bquote(F[v]/F[m]))+
+    xlab("Treatment Condition")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=90), strip.text.x = element_text(size=15,face="italic"), text=element_text(size=15))
+dev.off()
+tgc
+
+
